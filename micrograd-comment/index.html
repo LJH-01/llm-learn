@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>micrograd 交互式代码解析</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #080a0e;
+            --bg-surface: #0f1318;
+            --bg-card: #141820;
+            --border: #1e2530;
+            --text-primary: #e8eaed;
+            --text-secondary: #8b919e;
+            --accent-value: #00d4aa;
+            --accent-grad: #ff6b9d;
+            --accent-op: #ffd93d;
+            --accent-data: #60a5fa;
+            --accent-dim: #a78bfa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px;
+            background: radial-gradient(ellipse at 50% 30%, rgba(0, 212, 170, 0.08) 0%, transparent 60%),
+                        var(--bg-deep);
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-value) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        .hero .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-value);
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Navigation */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(8, 10, 14, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+        }
+
+        .nav-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent-value);
+            color: var(--accent-value);
+        }
+
+        .nav-btn.active {
+            background: var(--accent-value);
+            border-color: var(--accent-value);
+            color: var(--bg-deep);
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        .section {
+            margin-bottom: 120px;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .section-title .num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            padding: 6px 12px;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 6px;
+            color: var(--accent-value);
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 48px;
+            max-width: 800px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-header h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .code-header h3 .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-value);
+        }
+
+        .code-header .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 4px;
+            color: var(--accent-dim);
+        }
+
+        .code-body {
+            padding: 24px;
+            overflow-x: auto;
+        }
+
+        .code-body pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+
+        .code-line {
+            display: flex;
+            padding: 4px 0;
+            transition: background 0.15s;
+        }
+
+        .code-line:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .line-num {
+            width: 40px;
+            color: var(--text-secondary);
+            opacity: 0.4;
+            user-select: none;
+            text-align: right;
+            padding-right: 20px;
+        }
+
+        .line-code {
+            flex: 1;
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: #c792ea; } /* keyword */
+        .fn { color: #82aaff; } /* function */
+        .cl { color: #f78c6c; } /* class */
+        .str { color: #c3e88d; } /* string */
+        .num { color: #f78c6c; } /* number */
+        .cm { color: #546e7a; font-style: italic; } /* comment */
+        .op { color: #89ddff; } /* operator */
+        .dt { color: #ffcb6b; } /* data type */
+
+        /* Annotation */
+        .annotation {
+            display: inline-block;
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dashed var(--accent-value);
+        }
+
+        .annotation::after {
+            content: attr(data-note);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: var(--bg-card);
+            border: 1px solid var(--accent-value);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s;
+            z-index: 10;
+            max-width: 300px;
+            white-space: normal;
+        }
+
+        .annotation:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Dimension Diagram */
+        .dim-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+
+        .dim-diagram h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-value);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .dim-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .dim-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 24px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .dim-box .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .dim-box .shape {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--accent-data);
+        }
+
+        .dim-box .desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .dim-arrow {
+            font-size: 1.5rem;
+            color: var(--accent-value);
+        }
+
+        /* Value Node */
+        .value-node {
+            background: var(--bg-surface);
+            border: 1px solid var(--accent-value);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            display: inline-block;
+            min-width: 180px;
+        }
+
+        .value-node h5 {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-value);
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .value-node .attr {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .value-node .attr:last-child {
+            border-bottom: none;
+        }
+
+        .value-node .attr-name {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .value-node .attr-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .value-node .attr-val.data { color: var(--accent-data); }
+        .value-node .attr-val.grad { color: var(--accent-grad); }
+
+        /* Graph Visual */
+        .graph-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+
+        .graph-container h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-value);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .graph {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .graph-row {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .graph-node {
+            background: var(--bg-surface);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 24px;
+            text-align: center;
+            min-width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .graph-node:hover {
+            border-color: var(--accent-value);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 212, 170, 0.2);
+        }
+
+        .graph-node .op {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--accent-op);
+            margin-bottom: 4px;
+        }
+
+        .graph-node .val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .graph-edge {
+            width: 60px;
+            height: 2px;
+            background: var(--border);
+            position: relative;
+        }
+
+        .graph-edge::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-value);
+            font-size: 1.2rem;
+        }
+
+        /* Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .info-card h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-value);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-card td {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .info-card td:first-child {
+            color: var(--text-secondary);
+            width: 40%;
+        }
+
+        .info-card td:last-child {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-dim);
+        }
+
+        /* Formula */
+        .formula {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            overflow-x: auto;
+        }
+
+        .formula .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* Comparison Table */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .compare-table th {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        .compare-table td {
+            background: var(--bg-surface);
+        }
+
+        .compare-table code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-data);
+            background: rgba(96, 165, 250, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 60px 40px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent-value);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <section class="hero">
+        <h1>micrograd</h1>
+        <p>Andrej Karpathy 的自动微分引擎 — 用 100 行代码理解深度学习的反向传播</p>
+        <div class="badge">
+            <span>⚡</span>
+            <span>engine.py + nn.py</span>
+        </div>
+        <div class="scroll-hint">
+            <span>↓</span>
+            <span>向下滚动探索</span>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <button class="nav-btn active" onclick="scrollTo('value')">Value 类</button>
+            <button class="nav-btn" onclick="scrollTo('ops')">运算符</button>
+            <button class="nav-btn" onclick="scrollTo('backward')">反向传播</button>
+            <button class="nav-btn" onclick="scrollTo('module')">Module 基类</button>
+            <button class="nav-btn" onclick="scrollTo('neuron')">Neuron</button>
+            <button class="nav-btn" onclick="scrollTo('layer')">Layer</button>
+            <button class="nav-btn" onclick="scrollTo('mlp')">MLP</button>
+            <button class="nav-btn" onclick="scrollTo('train')">训练流程</button>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="content">
+        <!-- Value Class -->
+        <section id="value" class="section">
+            <h2 class="section-title">
+                <span class="num">01</span>
+                Value 类 — 一切的基础
+            </h2>
+            <p class="section-desc">
+                Value 是 micrograd 的核心，每个 Value 对象存储一个标量值及其梯度，
+                并通过维护前驱节点构建计算图。
+            </p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>engine.py</h3>
+                    <span class="tag">class Value</span>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">1</span><span class="line-code"><span class="kw">class</span> <span class="cl">Value</span>:</div>
+<div class="code-line"><span class="line-num">2</span><span class="line-code">    <span class="cm">""" 存储单个标量值及其梯度 """</span></div>
+<div class="code-line"><span class="line-num">3</span><span class="line-code"></span></div>
+<div class="code-line"><span class="line-num">4</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, data, _children=(), _op=<span class="str">''</span>):</div>
+<div class="code-line"><span class="line-num">5</span><span class="line-code">        <span class="kw">self</span>.data = data        <span class="cm"># 标量数值，如 2.5</span></div>
+<div class="code-line"><span class="line-num">6</span><span class="line-code">        <span class="kw">self</span>.grad = <span class="num">0</span>         <span class="cm"># 梯度值，初始化为 0</span></div>
+<div class="code-line"><span class="line-num">7</span><span class="line-code">        <span class="cm"># internal variables used for autograd graph construction</span></div>
+<div class="code-line"><span class="line-num">8</span><span class="line-code">        <span class="kw">self</span>._backward = <span class="kw">lambda</span>: <span class="kw">None</span>  <span class="cm"># 反向传播函数</span></div>
+<div class="code-line"><span class="line-num">9</span><span class="line-code">        <span class="kw">self</span>._prev = <span class="dt">set</span>(_children)    <span class="cm"># 前驱节点集合</span></div>
+<div class="code-line"><span class="line-num">10</span><span class="line-code">        <span class="kw">self</span>._op = _op              <span class="cm"># 操作类型，用于调试</span></div></pre>
+                </div>
+            </div>
+
+            <div class="dim-diagram">
+                <h4>Value 对象结构</h4>
+                <div class="dim-flow">
+                    <div class="dim-box">
+                        <div class="label">data</div>
+                        <div class="shape">2.5</div>
+                        <div class="desc">标量值</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box">
+                        <div class="label">grad</div>
+                        <div class="shape" style="color: var(--accent-grad)">0.0</div>
+                        <div class="desc">梯度</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box">
+                        <div class="label">_op</div>
+                        <div class="shape" style="color: var(--accent-op)">'+'</div>
+                        <div class="desc">操作类型</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>属性说明</h4>
+                    <table>
+                        <tr><td>data</td><td>float</td></tr>
+                        <tr><td>grad</td><td>float</td></tr>
+                        <tr><td>_backward</td><td>function</td></tr>
+                        <tr><td>_prev</td><td>set[Value]</td></tr>
+                        <tr><td>_op</td><td>str</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h4>维度特点</h4>
+                    <table>
+                        <tr><td>输入</td><td>标量 []</td></tr>
+                        <tr><td>输出</td><td>标量 []</td></tr>
+                        <tr><td>梯度传播</td><td>链式法则</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Operations -->
+        <section id="ops" class="section">
+            <h2 class="section-title">
+                <span class="num">02</span>
+                运算符重载 — 构建计算图
+            </h2>
+            <p class="section-desc">
+                通过 Python 运算符重载，每个操作都自动构建计算图节点，
+                并在反向传播时正确计算梯度。
+            </p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>加法 __add__</h3>
+                    <span class="tag">梯度: 1</span>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">12</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__add__</span>(<span class="kw">self</span>, other):</div>
+<div class="code-line"><span class="line-num">13</span><span class="line-code">        other = other <span class="kw">if</span> <span class="dt">isinstance</span>(other, Value) <span class="kw">else</span> <span class="cl">Value</span>(other)</div>
+<div class="code-line"><span class="line-num">14</span><span class="line-code">        out = <span class="cl">Value</span>(<span class="kw">self</span>.data + other.data, (<span class="kw">self</span>, other), <span class="str">'+'</span>)</div>
+<div class="code-line"><span class="line-num">15</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">16</span><span class="line-code">        <span class="kw">def</span> _backward():</div>
+<div class="code-line"><span class="line-num">17</span><span class="line-code">            <span class="kw">self</span>.grad += out.grad</div>
+<div class="code-line"><span class="line-num">18</span><span class="line-code">            other.grad += out.grad</div>
+<div class="code-line"><span class="line-num">19</span><span class="line-code">        out._backward = _backward</div>
+<div class="code-line"><span class="line-num">20</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">21</span><span class="line-code">        <span class="kw">return</span> out</div></pre>
+                </div>
+            </div>
+
+            <div class="dim-diagram">
+                <h4>加法计算图</h4>
+                <div class="dim-flow">
+                    <div class="dim-box">
+                        <div class="label">Value(a)</div>
+                        <div class="shape" style="color: var(--accent-data)">a.data</div>
+                    </div>
+                    <div class="dim-arrow">+</div>
+                    <div class="dim-box">
+                        <div class="label">Value(b)</div>
+                        <div class="shape" style="color: var(--accent-data)">b.data</div>
+                    </div>
+                    <div class="dim-arrow">=</div>
+                    <div class="dim-box">
+                        <div class="label">Value(out)</div>
+                        <div class="shape" style="color: var(--accent-value)">a+b</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>乘法 __mul__</h3>
+                    <span class="tag">梯度: factor</span>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">23</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__mul__</span>(<span class="kw">self</span>, other):</div>
+<div class="code-line"><span class="line-num">24</span><span class="line-code">        other = other <span class="kw">if</span> <span class="dt">isinstance</span>(other, Value) <span class="kw">else</span> <span class="cl">Value</span>(other)</div>
+<div class="code-line"><span class="line-num">25</span><span class="line-code">        out = <span class="cl">Value</span>(<span class="kw">self</span>.data * other.data, (<span class="kw">self</span>, other), <span class="str">'*'</span>)</div>
+<div class="code-line"><span class="line-num">26</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">27</span><span class="line-code">        <span class="kw">def</span> _backward():</div>
+<div class="code-line"><span class="line-num">28</span><span class="line-code">            <span class="kw">self</span>.grad += other.data * out.grad</div>
+<div class="code-line"><span class="line-num">29</span><span class="line-code">            other.grad += <span class="kw">self</span>.data * out.grad</div>
+<div class="code-line"><span class="line-num">30</span><span class="line-code">        out._backward = _backward</div>
+<div class="code-line"><span class="line-num">31</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">32</span><span class="line-code">        <span class="kw">return</span> out</div></pre>
+                </div>
+            </div>
+
+            <div class="formula">
+                <div class="label">乘法梯度公式 (链式法则)</div>
+                ∂L/∂a = ∂L/∂out × ∂out/∂a = out.grad × b
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>ReLU 激活</h3>
+                    <span class="tag">梯度: 0 or 1</span>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">40</span><span class="line-code">    <span class="kw">def</span> <span class="fn">relu</span>(<span class="kw">self</span>):</div>
+<div class="code-line"><span class="line-num">41</span><span class="line-code">        out = <span class="cl">Value</span>(<span class="num">0</span> <span class="kw">if</span> <span class="kw">self</span>.data < <span class="num">0</span> <span class="kw">else</span> <span class="kw">self</span>.data, (<span class="kw">self</span>,), <span class="str">'ReLU'</span>)</div>
+<div class="code-line"><span class="line-num">42</span></div>
+<div class="code-line"><span class="line-num">43</span><span class="line-code">        <span class="kw">def</span> _backward():</div>
+<div class="code-line"><span class="line-num">44</span><span class="line-code">            <span class="kw">self</span>.grad += (out.data > <span class="num">0</span>) * out.grad</div>
+<div class="code-line"><span class="line-num">45</span><span class="line-code">        out._backward = _backward</div>
+<div class="code-line"><span class="line-num">46</span></div>
+<div class="code-line"><span class="line-num">47</span><span class="line-code">        <span class="kw">return</span> out</div></pre>
+                </div>
+            </div>
+
+            <div class="dim-diagram">
+                <h4>ReLU 激活函数</h4>
+                <div class="dim-flow">
+                    <div class="dim-box">
+                        <div class="label">输入 x &lt; 0</div>
+                        <div class="shape" style="color: var(--accent-grad)">负数</div>
+                        <div class="desc">梯度=0</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box" style="border-color: var(--accent-grad)">
+                        <div class="label">ReLU</div>
+                        <div class="shape" style="color: var(--accent-grad)">0</div>
+                        <div class="desc">输出=0</div>
+                    </div>
+                    <div style="width: 60px"></div>
+                    <div class="dim-box">
+                        <div class="label">输入 x &gt; 0</div>
+                        <div class="shape" style="color: var(--accent-value)">正数</div>
+                        <div class="desc">梯度=1</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box" style="border-color: var(--accent-value)">
+                        <div class="label">ReLU</div>
+                        <div class="shape" style="color: var(--accent-value)">x</div>
+                        <div class="desc">输出=x</div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="compare-table">
+                <tr><th>运算</th><th>输入维度</th><th>输出维度</th><th>梯度公式</th></tr>
+                <tr><td>a + b</td><td>[], []</td><td>[]</td><td>da = out.grad</td></tr>
+                <tr><td>a * b</td><td>[], []</td><td>[]</td><td>da = b.data × out.grad</td></tr>
+                <tr><td>a ** n</td><td>[]</td><td>[]</td><td>da = n×a^(n-1) × out.grad</td></tr>
+                <tr><td>ReLU(a)</td><td>[]</td><td>[]</td><td>da = (a>0) × out.grad</td></tr>
+            </table>
+        </section>
+
+        <!-- Backward -->
+        <section id="backward" class="section">
+            <h2 class="section-title">
+                <span class="num">03</span>
+                反向传播 — backward()
+            </h2>
+            <p class="section-desc">
+                backward() 方法执行两步：1) 拓扑排序构建执行顺序，2) 逆序应用链式法则。
+            </p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>backward 实现</h3>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">48</span><span class="line-code">    <span class="kw">def</span> <span class="fn">backward</span>(<span class="kw">self</span>):</div>
+<div class="code-line"><span class="line-num">49</span><span class="line-code">        <span class="cm"># topological order all of the children in the graph</span></div>
+<div class="code-line"><span class="line-num">50</span><span class="line-code">        topo = []</div>
+<div class="code-line"><span class="line-num">51</span><span class="line-code">        visited = <span class="dt">set</span>()</div>
+<div class="code-line"><span class="line-num">52</span><span class="line-code">        <span class="kw">def</span> build_topo(v):</div>
+<div class="code-line"><span class="line-num">53</span><span class="line-code">            <span class="kw">if</span> v <span class="kw">not in</span> visited:</div>
+<div class="code-line"><span class="line-num">54</span><span class="line-code">                visited.add(v)</div>
+<div class="code-line"><span class="line-num">55</span><span class="line-code">                <span class="kw">for</span> child <span class="kw">in</span> v._prev:</div>
+<div class="code-line"><span class="line-num">56</span><span class="line-code">                    build_topo(child)</div>
+<div class="code-line"><span class="line-num">57</span><span class="line-code">                topo.append(v)</div>
+<div class="code-line"><span class="line-num">58</span><span class="line-code">        build_topo(<span class="kw">self</span>)</div>
+<div class="code-line"><span class="line-num">59</span></div>
+<div class="code-line"><span class="line-num">60</span><span class="line-code">        <span class="cm"># go one variable at a time and apply the chain rule to get its gradient</span></div>
+<div class="code-line"><span class="line-num">61</span><span class="line-code">        <span class="kw">self</span>.grad = <span class="num">1</span></div>
+<div class="code-line"><span class="line-num">62</span><span class="line-code">        <span class="kw">for</span> v <span class="kw">in</span> <span class="dt">reversed</span>(topo):</div>
+<div class="code-line"><span class="line-num">63</span><span class="line-code">            v._backward()</div></pre>
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <h4>计算图示例: z = a * b + ReLU(c)</h4>
+                <div class="graph">
+                    <div class="graph-row">
+                        <div class="graph-node">
+                            <div class="op">c</div>
+                            <div class="val">Value</div>
+                        </div>
+                        <div class="graph-edge"></div>
+                        <div class="graph-node">
+                            <div class="op">ReLU</div>
+                            <div class="val">forward: max(0,c)</div>
+                        </div>
+                    </div>
+                    <div class="graph-row">
+                        <div class="graph-node">
+                            <div class="op">a</div>
+                            <div class="val">Value</div>
+                        </div>
+                        <div class="graph-edge"></div>
+                        <div class="graph-node">
+                            <div class="op">*</div>
+                            <div class="val">a × b</div>
+                        </div>
+                        <div class="graph-edge"></div>
+                        <div class="graph-node">
+                            <div class="op">+</div>
+                            <div class="val">sum</div>
+                        </div>
+                        <div class="graph-edge"></div>
+                        <div class="graph-node" style="border-color: var(--accent-value)">
+                            <div class="op">z</div>
+                            <div class="val">output</div>
+                        </div>
+                    </div>
+                    <div class="graph-row">
+                        <div class="graph-node">
+                            <div class="op">b</div>
+                            <div class="val">Value</div>
+                        </div>
+                        <div class="graph-edge"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="formula">
+                <div class="label">链式法则示例</div>
+                ∂L/∂a = ∂L/∂z × ∂z/∂(a×b) × ∂(a×b)/∂a<br>
+                = 1 × 1 × b = b
+            </div>
+        </section>
+
+        <!-- Module -->
+        <section id="module" class="section">
+            <h2 class="section-title">
+                <span class="num">04</span>
+                Module 基类
+            </h2>
+            <p class="section-desc">
+                Module 是所有神经网络层的基类，定义了两个核心接口：
+                parameters() 返回可学习参数，zero_grad() 清除梯度。
+            </p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>nn.py</h3>
+                    <span class="tag">class Module</span>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">5</span><span class="line-code"><span class="kw">class</span> <span class="cl">Module</span>:</div>
+<div class="code-line"><span class="line-num">6</span><span class="line-code">    <span class="kw">def</span> <span class="fn">zero_grad</span>(<span class="kw">self</span>):</div>
+<div class="code-line"><span class="line-num">7</span><span class="line-code">        <span class="kw">for</span> p <span class="kw">in</span> <span class="kw">self</span>.parameters():</div>
+<div class="code-line"><span class="line-num">8</span><span class="line-code">            p.grad = <span class="num">0</span></div>
+<div class="code-line"><span class="line-num">9</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">10</span><span class="line-code">    <span class="kw">def</span> <span class="fn">parameters</span>(<span class="kw">self</span>):</div>
+<div class="code-line"><span class="line-num">11</span><span class="line-code">        <span class="kw">return</span> []</div></pre>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>接口说明</h4>
+                    <table>
+                        <tr><td>zero_grad()</td><td>清除所有参数梯度</td></tr>
+                        <tr><td>parameters()</td><td>返回 [p1, p2, ...]</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h4>设计模式</h4>
+                    <table>
+                        <tr><td>基类</td><td>定义接口</td></tr>
+                        <tr><td>子类</td><td>实现具体逻辑</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Neuron -->
+        <section id="neuron" class="section">
+            <h2 class="section-title">
+                <span class="num">05</span>
+                Neuron — 单神经元
+            </h2>
+            <p class="section-desc">
+                Neuron 实现：y = ReLU(w·x + b)，其中 w 是权重向量，b 是偏置。
+            </p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>nn.py</h3>
+                    <span class="tag">class Neuron</span>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">13</span><span class="line-code"><span class="kw">class</span> <span class="cl">Neuron</span>(Module):</div>
+<div class="code-line"><span class="line-num">14</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, nin, nonlin=True):</div>
+<div class="code-line"><span class="line-num">15</span><span class="line-code">        self.w = [<span class="cl">Value</span>(random.uniform(-<span class="num">1</span>,<span class="num">1</span>)) <span class="kw">for</span> _ <span class="kw">in</span> <span class="dt">range</span>(nin)]</div>
+<div class="code-line"><span class="line-num">16</span><span class="line-code">        self.b = <span class="cl">Value</span>(<span class="num">0</span>)</div>
+<div class="code-line"><span class="line-num">17</span><span class="line-code">        self.nonlin = nonlin</div>
+<div class="code-line"><span class="line-num">18</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">19</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__call__</span>(<span class="kw">self</span>, x):</div>
+<div class="code-line"><span class="line-num">20</span><span class="line-code">        act = <span class="dt">sum</span>((wi*xi <span class="kw">for</span> wi,xi <span class="kw">in</span> <span class="dt">zip</span>(<span class="kw">self</span>.w, x)), <span class="kw">self</span>.b)</div>
+<div class="code-line"><span class="line-num">21</span><span class="line-code">        <span class="kw">return</span> act.relu() <span class="kw">if</span> <span class="kw">self</span>.nonlin <span class="kw">else</span> act</div>
+<div class="code-line"><span class="line-num">22</span></div>
+<div class="code-line"><span class="line-num">23</span><span class="line-code">    <span class="kw">def</span> <span class="fn">parameters</span>(<span class="kw">self</span>):</div>
+<div class="code-line"><span class="line-num">24</span><span class="line-code">        <span class="kw">return</span> <span class="kw">self</span>.w + [<span class="kw">self</span>.b]</div></pre>
+                </div>
+            </div>
+
+            <div class="dim-diagram">
+                <h4>Neuron 维度变换</h4>
+                <div class="dim-flow">
+                    <div class="dim-box">
+                        <div class="label">输入 x</div>
+                        <div class="shape">[x₁, x₂, ..., xₙ]</div>
+                        <div class="desc">nin 维向量</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box">
+                        <div class="label">权重 w</div>
+                        <div class="shape">[w₁, w₂, ..., wₙ]</div>
+                        <div class="desc">nin 维向量</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box" style="border-color: var(--accent-op)">
+                        <div class="label">w·x + b</div>
+                        <div class="shape" style="color: var(--accent-op)">Σwᵢxᵢ+b</div>
+                        <div class="desc">标量</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box" style="border-color: var(--accent-value)">
+                        <div class="label">ReLU</div>
+                        <div class="shape" style="color: var(--accent-value)">y</div>
+                        <div class="desc">输出标量</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="formula">
+                <div class="label">计算公式</div>
+                act = Σᵢ(wᵢ × xᵢ) + b = w · x + b<br>
+                y = ReLU(act) if nonlin else act
+            </div>
+        </section>
+
+        <!-- Layer -->
+        <section id="layer" class="section">
+            <h2 class="section-title">
+                <span class="num">06</span>
+                Layer — 全连接层
+            </h2>
+            <p class="section-desc">
+                Layer 包含多个 Neuron，并行处理输入，每个 Neuron 产生一个输出。
+            </p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>nn.py</h3>
+                    <span class="tag">class Layer</span>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">28</span><span class="line-code"><span class="kw">class</span> <span class="cl">Layer</span>(Module):</div>
+<div class="code-line"><span class="line-num">29</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, nin, nout, **kwargs):</div>
+<div class="code-line"><span class="line-num">30</span><span class="line-code">        self.neurons = [<span class="cl">Neuron</span>(nin, **kwargs) <span class="kw">for</span> _ <span class="kw">in</span> <span class="dt">range</span>(nout)]</div>
+<div class="code-line"><span class="line-num">31</span></div>
+<div class="code-line"><span class="line-num">32</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__call__</span>(<span class="kw">self</span>, x):</div>
+<div class="code-line"><span class="line-num">33</span><span class="line-code">        out = [n(x) <span class="kw">for</span> n <span class="kw">in</span> self.neurons]</div>
+<div class="code-line"><span class="line-num">34</span><span class="line-code">        <span class="kw">return</span> out[<span class="num">0</span>] <span class="kw">if</span> <span class="dt">len</span>(out) == <span class="num">1</span> <span class="kw">else</span> out</div></pre>
+                </div>
+            </div>
+
+            <div class="dim-diagram">
+                <h4>Layer 维度变换</h4>
+                <div class="dim-flow">
+                    <div class="dim-box">
+                        <div class="label">输入 x</div>
+                        <div class="shape">[nin]</div>
+                        <div class="desc">nin 维</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box">
+                        <div class="label">Neuron₁</div>
+                        <div class="shape">→ y₁</div>
+                    </div>
+                    <div class="dim-box">
+                        <div class="label">Neuron₂</div>
+                        <div class="shape">→ y₂</div>
+                    </div>
+                    <div class="dim-box">
+                        <div class="label">...</div>
+                        <div class="shape">...</div>
+                    </div>
+                    <div class="dim-box">
+                        <div class="label">Neuronₙ</div>
+                        <div class="shape">→ yₙ</div>
+                    </div>
+                    <div class="dim-arrow">→</div>
+                    <div class="dim-box" style="border-color: var(--accent-value)">
+                        <div class="label">输出 y</div>
+                        <div class="shape" style="color: var(--accent-value)">[nout]</div>
+                        <div class="desc">nout 维</div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="compare-table">
+                <tr><th>属性</th><th>类型</th><th>说明</th></tr>
+                <tr><td>neurons</td><td>list[Neuron]</td><td>nout 个神经元</td></tr>
+                <tr><td>参数数量</td><td>nin × nout + nout</td><td>权重 + 偏置</td></tr>
+            </table>
+        </section>
+
+        <!-- MLP -->
+        <section id="mlp" class="section">
+            <h2 class="section-title">
+                <span class="num">07</span>
+                MLP — 多层感知机
+            </h2>
+            <p class="section-desc">
+                MLP 由多个 Layer 堆叠而成，除最后一层外都使用 ReLU 激活。
+            </p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>nn.py</h3>
+                    <span class="tag">class MLP</span>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">39</span><span class="line-code"><span class="kw">class</span> <span class="cl">MLP</span>(Module):</div>
+<div class="code-line"><span class="line-num">40</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, nin, nouts):</div>
+<div class="code-line"><span class="line-num">41</span><span class="line-code">        sz = [nin] + nouts</div>
+<div class="code-line"><span class="line-num">42</span><span class="line-code">        self.layers = [Layer(sz[i], sz[i+1], nonlin=i!=<span class="dt">len</span>(nouts)-<span class="num">1</span>)</div>
+<div class="code-line"><span class="line-num">43</span><span class="line-code">                       <span class="kw">for</span> i <span class="kw">in</span> <span class="dt">range</span>(<span class="dt">len</span>(nouts))]</div>
+<div class="code-line"><span class="line-num">44</span></div>
+<div class="code-line"><span class="line-num">45</span><span class="line-code">    <span class="kw">def</span> <span class="fn">__call__</span>(<span class="kw">self</span>, x):</div>
+<div class="code-line"><span class="line-num">46</span><span class="line-code">        <span class="kw">for</span> layer <span class="kw">in</span> self.layers:</div>
+<div class="code-line"><span class="line-num">47</span><span class="line-code">            x = layer(x)</div>
+<div class="code-line"><span class="line-num">48</span><span class="line-code">        <span class="kw">return</span> x</div></pre>
+                </div>
+            </div>
+
+            <div class="dim-diagram">
+                <h4>MLP(2, [8, 4, 1]) 架构</h4>
+                <div class="dim-flow" style="flex-direction: column; gap: 20px;">
+                    <div class="dim-box" style="min-width: 200px;">
+                        <div class="label">输入层</div>
+                        <div class="shape">[2]</div>
+                        <div class="desc">nin = 2</div>
+                    </div>
+                    <div class="dim-arrow" style="transform: rotate(-90deg);">↓</div>
+                    <div class="dim-box" style="border-color: var(--accent-op); min-width: 200px;">
+                        <div class="label">Layer 1 → ReLU</div>
+                        <div class="shape">2 → 8</div>
+                        <div class="desc">hidden size 8</div>
+                    </div>
+                    <div class="dim-arrow" style="transform: rotate(-90deg);">↓</div>
+                    <div class="dim-box" style="border-color: var(--accent-op); min-width: 200px;">
+                        <div class="label">Layer 2 → ReLU</div>
+                        <div class="shape">8 → 4</div>
+                        <div class="desc">hidden size 4</div>
+                    </div>
+                    <div class="dim-arrow" style="transform: rotate(-90deg);">↓</div>
+                    <div class="dim-box" style="border-color: var(--accent-grad); min-width: 200px;">
+                        <div class="label">Layer 3 → Linear</div>
+                        <div class="shape">4 → 1</div>
+                        <div class="desc">输出标量</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="formula">
+                <div class="label">参数数量计算</div>
+                Layer₁: nin×8 + 8 = 2×8 + 8 = 24<br>
+                Layer₂: 8×4 + 4 = 32 + 4 = 36<br>
+                Layer₃: 4×1 + 1 = 4 + 1 = 5<br>
+                <strong>总计: 65 个可学习参数</strong>
+            </div>
+        </section>
+
+        <!-- Training -->
+        <section id="train" class="section">
+            <h2 class="section-title">
+                <span class="num">08</span>
+                训练流程
+            </h2>
+            <p class="section-desc">
+                使用 micrograd 训练一个简单模型的完整流程：
+                前向传播 → 计算损失 → 反向传播 → 更新参数。
+            </p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <h3><span class="dot"></span>完整训练循环</h3>
+                </div>
+                <div class="code-body">
+<pre><div class="code-line"><span class="line-num">1</span><span class="line-code"><span class="kw">from</span> micrograd.nn <span class="kw">import</span> MLP</div>
+<div class="code-line"><span class="line-num">2</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">3</span><span class="line-code"><span class="cm"># 1. 构建模型</span></div>
+<div class="code-line"><span class="line-num">4</span><span class="line-code">model = MLP(<span class="num">2</span>, [<span class="num">8</span>, <span class="num">4</span>, <span class="num">1</span>])</div>
+<div class="code-line"><span class="line-num">5</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">6</span><span class="line-code"><span class="cm"># 2. 前向传播</span></div>
+<div class="code-line"><span class="line-num">7</span><span class="line-code">x = [<span class="num">1.0</span>, <span class="num">2.0</span>]</div>
+<div class="code-line"><span class="line-num">8</span><span class="line-code">y_pred = model(x)      <span class="cm"># Value(data=?, grad=0)</span></div>
+<div class="code-line"><span class="line-num">9</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">10</span><span class="line-code"><span class="cm"># 3. 计算损失</span></div>
+<div class="code-line"><span class="line-num">11</span><span class="line-code">y_true = <span class="cl">Value</span>(<span class="num">1.0</span>)</div>
+<div class="code-line"><span class="line-num">12</span><span class="line-code">loss = (y_pred - y_true) ** <span class="num">2</span>  <span class="cm"># MSE</span></div>
+<div class="code-line"><span class="line-num">13</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">14</span><span class="line-code"><span class="cm"># 4. 反向传播</span></div>
+<div class="code-line"><span class="line-num">15</span><span class="line-code">loss.backward()</div>
+<div class="code-line"><span class="line-num">16</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">17</span><span class="line-code"><span class="cm"># 5. 更新参数</span></div>
+<div class="code-line"><span class="line-num">18</span><span class="line-code">lr = <span class="num">0.1</span></div>
+<div class="code-line"><span class="line-num">19</span><span class="line-code"><span class="kw">for</span> p <span class="kw">in</span> model.parameters():</div>
+<div class="code-line"><span class="line-num">20</span><span class="line-code">    p.data -= lr * p.grad</div>
+<div class="code-line"><span class="line-num">21</span><span class="line-code"></div>
+<div class="code-line"><span class="line-num">22</span><span class="line-code"><span class="cm"># 6. 清除梯度（下一轮训练）</span></div>
+<div class="code-line"><span class="line-num">23</span><span class="line-code">model.zero_grad()</div></pre>
+                </div>
+            </div>
+
+            <div class="dim-diagram">
+                <h4>训练流程图</h4>
+                <div style="display: flex; flex-direction: column; gap: 24px; align-items: center;">
+                    <div class="dim-box" style="border-color: var(--accent-data);">
+                        <div class="label">输入 x = [1.0, 2.0]</div>
+                        <div class="shape" style="color: var(--accent-data)">[2]</div>
+                    </div>
+                    <div class="dim-arrow" style="font-size: 2rem; color: var(--accent-op);">↓ forward</div>
+                    <div class="dim-box" style="border-color: var(--accent-op);">
+                        <div class="label">MLP Forward</div>
+                        <div class="shape" style="color: var(--accent-op)">y_pred</div>
+                    </div>
+                    <div class="dim-arrow" style="font-size: 2rem; color: var(--accent-op);">↓ loss</div>
+                    <div class="dim-box" style="border-color: var(--accent-grad);">
+                        <div class="label">计算损失</div>
+                        <div class="shape" style="color: var(--accent-grad)">MSE = (y_pred - y_true)²</div>
+                    </div>
+                    <div class="dim-arrow" style="font-size: 2rem; color: var(--accent-op);">↓ backward</div>
+                    <div class="dim-box" style="border-color: var(--accent-grad);">
+                        <div class="label">反向传播</div>
+                        <div class="shape" style="color: var(--accent-grad)">∂L/∂w for all w</div>
+                    </div>
+                    <div class="dim-arrow" style="font-size: 2rem; color: var(--accent-op);">↓ update</div>
+                    <div class="dim-box" style="border-color: var(--accent-value);">
+                        <div class="label">参数更新</div>
+                        <div class="shape" style="color: var(--accent-value)">w = w - lr × grad</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            📚 课程视频: <a href="https://www.youtube.com/watch?v=VMj-3S1tku0" target="_blank">Backpropagation micrograd</a>
+            <br><br>
+            📦 源代码: <a href="https://github.com/karpathy/micrograd" target="_blank">karpathy/micrograd</a>
+        </p>
+    </footer>
+
+    <script>
+        // Scroll animations
+        const sections = document.querySelectorAll('.section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        sections.forEach(section => observer.observe(section));
+
+        // Navigation
+        function scrollTo(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            }
+        }
+
+        // Update active nav on scroll
+        const navBtns = document.querySelectorAll('.nav-btn');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navBtns.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(current)) {
+                    btn.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
