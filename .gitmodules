@@ -1,0 +1,3 @@
+[submodule "nn-zero-to-hero"]
+	path = nn-zero-to-hero
+	url = https://github.com/karpathy/nn-zero-to-hero.git
