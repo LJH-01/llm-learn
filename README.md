@@ -319,8 +319,8 @@ BPE 算法:
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://youtu.be/l8pRSuU81PU) |
-| **代码仓库** | [build-nanogpt](https://github.com/karpathy/build-nanogpt) / [ng-video-lecture](https://github.com/karpathy/ng-video-lecture) |
-| **中文注释版** | [nanogpt-build-comment](./nanogpt-build-comment/) |
+| **代码仓库** | [build-nanogpt](https://github.com/karpathy/build-nanogpt) / [nanoGPT](https://github.com/karpathy/nanoGPT) / [ng-video-lecture](https://github.com/karpathy/ng-video-lecture) |
+| **中文注释版** | [nanogpt-build-comment](./nanogpt-build-comment/) / [nanoGPT-comment](./nanoGPT-comment/) |
 | **核心内容** | 从零训练 GPT-2、使用 FineWeb 数据集 |
 
 **课程介绍**:
@@ -432,8 +432,11 @@ karpathy-gpt-roadmap/
 │   └── minbpe-comment/              # Lecture 8 中文注释
 │
 ├── 阶段四/                           # 训练与微调
-│   └── nanogpt-build-comment/         # Lecture 9 中文注释
-│       └── code/train_gpt2.py        # GPT-2 训练代码 + 注释
+│   ├── nanogpt-build-comment/         # Lecture 9 中文注释 (build-nanogpt)
+│   └── nanoGPT-comment/              # nanoGPT 完整注释版
+│       ├── model.py                  # GPT 模型定义 + 详细中文注释
+│       ├── train.py                  # 训练脚本 + 详细中文注释
+│       └── ...
 │
 └── 阶段五/                           # 底层实现 (可选)
     ├── llm-c-comment/
