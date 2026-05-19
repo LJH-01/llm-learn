@@ -32,6 +32,7 @@
 | **代码演示** | [lectures/micrograd](./lectures/micrograd/) |
 | **代码仓库** | [micrograd](https://github.com/karpathy/micrograd) |
 | **中文注释版** | [micrograd-comment](./micrograd-comment/) |
+| **Colab** | [Colab](https://colab.research.google.com/github/karpathy/nn-zero-to-hero/blob/master/lectures/micrograd/micrograd_lecture_first_half_roughly.ipynb) |
 | **核心内容** | 反向传播算法、梯度下降、PyTorch 基础 |
 
 **课程介绍**:
@@ -71,6 +72,7 @@
 | **代码演示** | [lectures/makemore/makemore_part1_bigrams.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-comment](./makemore-comment/) |
+| **Colab** | [Colab](https://colab.research.google.com/github/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part1_bigrams.ipynb) |
 | **核心内容** | 字符级语言模型、Bigram 模型、PyTorch Tensor |
 
 **课程介绍**:
@@ -111,6 +113,7 @@ Bigram 模型 — 最简单的语言模型
 | **代码演示** | [lectures/makemore/makemore_part2_mlp.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-comment](./makemore-comment/) |
+| **Colab** | [Colab](https://colab.research.google.com/github/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part2_mlp.ipynb) |
 | **核心内容** | MLP 架构、过拟合/欠拟合、学习率调优 |
 
 **课程介绍**:
@@ -147,6 +150,7 @@ MLP (Bengio 2003) — 多层感知机语言模型
 | **代码演示** | [lectures/makemore/makemore_part3_bn.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-comment](./makemore-comment/) |
+| **Colab** | [Colab](https://colab.research.google.com/github/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part3_bn.ipynb) |
 | **核心内容** | 激活函数统计、BatchNorm 原理、梯度诊断 |
 
 **课程介绍**:
@@ -178,6 +182,7 @@ BatchNorm 公式:
 | **代码演示** | [lectures/makemore/makemore_part4_backprop.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-comment](./makemore-comment/) |
+| **Colab** | [Colab](https://colab.research.google.com/drive/1WV2oi2fh9XXyldh02wupFQX0wh5ZC-z-?usp=sharing) |
 | **核心内容** | 手动实现反向传播、Cross Entropy、LayerNorm |
 
 **课程介绍**:
@@ -206,6 +211,7 @@ BatchNorm 公式:
 | **代码演示** | [lectures/makemore/makemore_part5_cnn1.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-comment](./makemore-comment/) |
+| **Colab** | [Colab](https://colab.research.google.com/github/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part5_cnn1.ipynb) |
 | **核心内容** | 卷积神经网络、膨胀卷积、层次化结构 |
 
 **课程介绍**:
@@ -297,6 +303,7 @@ Output
 | **视频** | [🎬 YouTube](https://www.youtube.com/watch?v=zduSFxRajkE) |
 | **代码仓库** | [minbpe](https://github.com/karpathy/minbpe) |
 | **中文注释版** | [minbpe-comment](./minbpe-comment/) |
+| **Colab** | [Colab](https://colab.research.google.com/drive/1y0KnCFZvGVf_odSfcNAws6kcDD7HsI0L?usp=sharing) |
 | **核心内容** | BPE 算法、Tokenization 问题、GPT Tokenizer |
 
 **课程介绍**:
@@ -415,6 +422,7 @@ CUDA 优化:
 karpathy-gpt-roadmap/
 ├── README.md                          # 本文件
 ├── SETUP.md                           # Python 环境配置指南
+├── colabs/                            # Google Colab 笔记本链接
 │
 ├── lectures/                          # 原始课程代码（notebooks）
 │   ├── micrograd/                    # Lecture 1-2: 反向传播 Jupyter notebooks
