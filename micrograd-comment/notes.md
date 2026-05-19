@@ -1,179 +1,202 @@
-# micrograd — 反向传播与自动微分
+# Lecture 1: micrograd — 反向传播与自动微分
 
-> micrograd 是 Andrej Karpathy 实现的一个精简自动微分引擎，是理解 PyTorch 反向传播机制的绝佳入门教材。
+本仓库包含 Andrej Karpathy 的 micrograd 课程详细中文注释和学习笔记。
 
 ---
 
-## 📚 课程概览
+## 📚 课程信息
 
-| 项目 | 内容 |
-|------|------|
-| **视频** | [YouTube](https://www.youtube.com/watch?v=VMj-3S1tku0) |
-| **源代码** | [karpathy/micrograd](https://github.com/karpathy/micrograd) |
-| **核心主题** | 自动求导、反向传播、神经网络 |
+- **视频**: [YouTube - Backpropagation micrograd](https://www.youtube.com/watch?v=VMj-3S1tku0)
+- **源代码**: [karpathy/micrograd](https://github.com/karpathy/micrograd)
+- **课程难度**: ★★★☆☆ （需要 Python 基础）
+- **预计学习时间**: 4-6 小时
 
 ---
 
 ## 🎯 学习目标
 
-1. 理解反向传播的数学原理
-2. 掌握计算图的构建方法
-3. 实现自动微分引擎
-4. 理解链式法则在神经网络中的应用
+1. 理解**反向传播**的数学原理
+2. 掌握**计算图**的构建方法
+3. 理解**链式法则**在梯度计算中的应用
+4. 实现一个精简的**自动微分引擎**
 
 ---
 
-## 📁 文件结构
+## 📖 课程内容
 
-```
-micrograd/
-├── __init__.py         # 包导出
-├── engine.py          # 核心：Value 类，自动求导
-├── nn.py              # 神经网络层：Neuron, Layer, MLP
-└── test/
-    └── test_engine.py # 单元测试
-```
+### Part 1: 自动求导基础
+
+- 计算图的概念
+- 前向传播与反向传播
+- 链式法则
+- 梯度计算规则
+
+### Part 2: Value 类实现
+
+- 数据结构设计
+- 运算符重载
+- 反向传播函数
+- 拓扑排序
+
+### Part 3: 神经网络模块
+
+- Module 基类
+- Neuron 单神经元
+- Layer 全连接层
+- MLP 多层感知机
+
+### Part 4: 训练流程
+
+- 前向传播
+- 损失计算
+- 反向传播
+- 参数更新
 
 ---
 
-## 🧠 核心概念
+## 🧠 核心概念详解
 
-### Value 类 — 自动求导的基础
+### 1. 什么是反向传播？
+
+反向传播（Backpropagation）是训练神经网络的核心算法，通过链式法则从输出层向输入层传播梯度。
+
+```
+计算: y = f(g(x))
+链式法则: dy/dx = dy/df × df/dg × dg/dx
+```
+
+### 2. 梯度计算规则
+
+```
+加法: ∂(a+b)/∂a = 1, ∂(a+b)/∂b = 1
+     反向传播: self.grad += out.grad, other.grad += out.grad
+
+乘法: ∂(a×b)/∂a = b, ∂(a×b)/∂b = a
+     反向传播: self.grad += other.data × out.grad
+
+ReLU: ∂ReLU/∂a = 1 if a > 0 else 0
+     反向传播: self.grad += (out.data > 0) × out.grad
+```
+
+### 3. 计算图构建
+
+每次进行运算时，micrograd 自动：
+
+1. 创建新的 Value 节点
+2. 记录前驱节点（`_prev`）
+3. 记录操作类型（`_op`）
+4. 定义反向传播函数（`_backward`）
+
+---
+
+## 📁 代码文件说明
+
+| 文件 | 说明 |
+|------|------|
+| `code/micrograd/engine.py` | 自动求导引擎核心，Value 类实现 |
+| `code/micrograd/nn.py` | 神经网络层：Module, Neuron, Layer, MLP |
+| `code/micrograd/__init__.py` | 包初始化文件 |
+| `code/test/test_engine.py` | 单元测试，对比 PyTorch 验证正确性 |
+| `code/demo.ipynb` | Jupyter Notebook 演示 |
+| `code/trace_graph.ipynb` | 计算图追踪演示 |
+
+---
+
+## 🔧 运行代码
+
+### 环境准备
+
+```bash
+cd micrograd-comment/code
+pip install torch  # 仅用于测试验证
+```
+
+### 运行测试
+
+```bash
+python test/test_engine.py
+```
+
+### 交互示例
 
 ```python
-class Value:
-    """ 存储单个标量值及其梯度 """
-    
-    def __init__(self, data, _children=(), _op=''):
-        self.data = data        # 标量数值
-        self.grad = 0          # 梯度值
-        self._backward = lambda: None  # 反向传播函数
-        self._prev = set(_children)    # 前驱节点
-        self._op = _op                  # 操作类型
-```
+from micrograd.engine import Value
 
-### 运算符与梯度
+# 创建变量
+x = Value(2.0)
+y = Value(3.0)
 
-| 运算 | 梯度公式 |
-|------|---------|
-| `a + b` | ∂L/∂a = out.grad |
-| `a * b` | ∂L/∂a = b.data × out.grad |
-| `a ** n` | ∂L/∂a = n × a^(n-1) × out.grad |
-| `ReLU(a)` | ∂L/∂a = (a > 0) × out.grad |
+# 构建计算图
+z = x * y + x ** 2
 
----
+# 反向传播
+z.backward()
 
-## 🔄 反向传播算法
-
-### 两步流程
-
-1. **拓扑排序**：构建从叶到根的执行顺序
-2. **链式法则**：逆序应用梯度计算
-
-```python
-def backward(self):
-    topo = []
-    visited = set()
-    
-    # 1. 拓扑排序
-    def build_topo(v):
-        if v not in visited:
-            visited.add(v)
-            for child in v._prev:
-                build_topo(child)
-            topo.append(v)
-    build_topo(self)
-    
-    # 2. 链式法则
-    self.grad = 1
-    for v in reversed(topo):
-        v._backward()
+# 查看梯度
+print(f"dz/dx = {x.grad}")  # dz/dx = y + 2x = 3 + 4 = 7
+print(f"dz/dy = {y.grad}")  # dz/dy = x = 2
 ```
 
 ---
 
-## 🏗️ 神经网络模块
-
-### Module 基类
-
-所有网络层继承自 Module，提供统一接口：
+## 📊 训练示例
 
 ```python
-class Module:
-    def zero_grad(self):
-        for p in self.parameters():
-            p.grad = 0
-    
-    def parameters(self):
-        return []
-```
+from micrograd.nn import MLP
 
-### 层级结构
+# 创建模型
+model = MLP(2, [16, 8, 1])
 
-```
-Module
-├── Neuron(nin)     # 单神经元: y = ReLU(w·x + b)
-├── Layer(nin, nout) # 全连接层: 多个 Neuron 并行
-└── MLP(nin, nouts)  # 多层感知机: 多个 Layer 堆叠
-```
+# 准备数据
+x = [1.5, 2.5]
+y_true = 1.0
 
----
+# 前向传播
+y_pred = model(x)
+if not isinstance(y_pred, Value):
+    y_pred = y_pred[0]  # MLP 返回列表时取第一个元素
 
-## 📊 训练流程
+# 计算损失
+loss = (y_pred - Value(y_true)) ** 2
 
-```python
-# 1. 构建模型
-model = MLP(2, [8, 4, 1])
-
-# 2. 前向传播
-y_pred = model([1.0, 2.0])
-
-# 3. 计算损失
-loss = (y_pred - y_true) ** 2
-
-# 4. 反向传播
+# 反向传播
 loss.backward()
 
-# 5. 更新参数
+# 参数更新
+lr = 0.1
 for p in model.parameters():
     p.data -= lr * p.grad
 
-# 6. 清除梯度
+# 清除梯度
 model.zero_grad()
 ```
 
 ---
 
-## 🧪 测试验证
+## 🤔 常见问题
 
-```bash
-cd micrograd
-python test/test_engine.py
-```
+### Q: micrograd 为什么只处理标量？
 
-测试用例：
-- `test_sanity_check()`: 基础前向/反向传播
-- `test_more_ops()`: 扩展操作符测试
+A: 为了简化实现。标量运算使计算图更清晰，梯度计算更直观。
 
----
+### Q: 如何调试计算图？
 
-## 📐 维度变换总览
+A: 使用 `_op` 属性查看操作类型，使用 `_prev` 查看前驱节点。
 
-| 模块 | 输入维度 | 输出维度 | 参数数量 |
-|------|---------|---------|---------|
-| Neuron (nin→1) | `[nin]` | `[]` 标量 | nin + 1 |
-| Layer (nin→nout) | `[nin]` | `[nout]` | nin×nout + nout |
-| MLP 完整前向 | `[nin]` | `[nout[-1]]` | Σ(ninᵢ×ninᵢ₊₁ + ninᵢ₊₁) |
+### Q: micrograd 与 PyTorch 的区别？
+
+A: micrograd 是教学目的的最小实现，PyTorch 是生产级框架。核心原理相同。
 
 ---
 
-## 🔑 关键设计思想
+## 🔗 相关资源
 
-1. **表达式求导而非数值求导**：使用链式法则精确计算梯度
-2. **动态计算图**：每次前向传播实时构建计算图
-3. **运算符重载**：`+`, `-`, `*`, `**`, `ReLU` 自动维护计算图
+- [Karpathy YouTube 频道](https://www.youtube.com/@AndrejKarpathy)
+- [minGPT - Karpathy 的 GPT 实现](https://github.com/karpathy/minGPT)
+- [makemore - 字符级语言模型](https://github.com/karpathy/makemore)
 
 ---
 
-> 📚 视频: [Backpropagation micrograd](https://www.youtube.com/watch?v=VMj-3S1tku0)
-> 📦 代码: [karpathy/micrograd](https://github.com/karpathy/micrograd)
+> 📝 本笔记由中文注释版贡献者编写
+> ⚠️ 如发现错误欢迎提交 Issue 或 PR
+> 📄 许可证与原仓库一致（MIT）
