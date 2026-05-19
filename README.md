@@ -235,8 +235,8 @@ WaveNet 堆叠:
 |------|------|
 | **视频** | [🎬 YouTube](https://www.youtube.com/watch?v=kCc8FmEb1nY) |
 | **代码演示** | [lectures/nanogpt](./lectures/nanogpt/) |
-| **代码仓库** | [nanoGPT](https://github.com/karpathy/nanoGPT) |
-| **中文注释版** | [gpt-build-comment](./gpt-build-comment/) |
+| **代码仓库** | [ng-video-lecture](https://github.com/karpathy/ng-video-lecture) / [nanoGPT](https://github.com/karpathy/nanoGPT) |
+| **中文注释版** | [nanoGPT-comment](./nanoGPT-comment/) |
 | **核心内容** | Transformer 架构、Self-Attention、GPT 实现 |
 
 **课程介绍**:
@@ -327,7 +327,7 @@ BPE 算法:
 |------|------|
 | **视频** | [🎬 YouTube](https://youtu.be/l8pRSuU81PU) |
 | **代码演示** | [nanogpt-build-comment](./nanogpt-build-comment/) |
-| **代码仓库** | [build-nanogpt](https://github.com/karpathy/build-nanogpt) / [nanoGPT](https://github.com/karpathy/nanoGPT) / [ng-video-lecture](https://github.com/karpathy/ng-video-lecture) |
+| **代码仓库** | [build-nanogpt](https://github.com/karpathy/build-nanogpt) / [nanoGPT](https://github.com/karpathy/nanoGPT) |
 | **中文注释版** | [nanoGPT-comment](./nanoGPT-comment/) |
 | **核心内容** | 从零训练 GPT-2、使用 FineWeb 数据集 |
 
