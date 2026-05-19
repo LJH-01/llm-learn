@@ -33,6 +33,9 @@
 | **中文注释版** | [micrograd-comment](./micrograd-comment/) |
 | **核心内容** | 反向传播算法、梯度下降、PyTorch 基础 |
 
+**课程介绍**:
+本课程介绍神经网络反向传播算法（Backpropagation）的实现。我们从零开始构建一个轻量级的 autograd 引擎 `micrograd`，它能在动态计算图上进行反向模式自动微分。通过约 150 行代码，你将理解神经网络训练的核心机制。课程假设具备基本的 Python 知识和对微积分的模糊记忆。
+
 **实现原理**:
 
 ```
@@ -67,6 +70,9 @@
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-part1-comment](./makemore-part1-comment/) |
 | **核心内容** | 字符级语言模型、Bigram 模型、PyTorch Tensor |
+
+**课程介绍**:
+我们实现一个字符级 Bigram 语言模型，这是后续视频中逐步复杂化为现代 Transformer 语言模型（如 GPT）的基础。本视频重点关注：(1) 介绍 `torch.Tensor` 及其在高效评估神经网络时的细节；(2) 语言建模的总体框架，包括模型训练、采样和损失函数评估（如分类的负对数似然）。
 
 **实现原理**:
 
@@ -104,6 +110,9 @@ Bigram 模型 — 最简单的语言模型
 | **中文注释版** | [makemore-part2-comment](./makemore-part2-comment/) |
 | **核心内容** | MLP 架构、过拟合/欠拟合、学习率调优 |
 
+**课程介绍**:
+我们实现一个多层感知机（MLP）字符级语言模型。本视频还介绍了机器学习的许多基础知识：模型训练、学习率调优、超参数设置、评估方法、训练/验证/测试集划分、欠拟合与过拟合等。
+
 **实现原理**:
 
 ```
@@ -136,6 +145,9 @@ MLP (Bengio 2003) — 多层感知机语言模型
 | **中文注释版** | [makemore-part3-comment](./makemore-part3-comment/) |
 | **核心内容** | 激活函数统计、BatchNorm 原理、梯度诊断 |
 
+**课程介绍**:
+我们深入探讨多层 MLP 的内部机制，审视前向传播激活值的统计量、后向传播梯度的行为，以及当它们缩放不当时的常见陷阱。同时介绍常用的诊断工具和可视化方法，帮助理解深度网络的健康状况。我们还将学习为何训练深度神经网络曾经非常困难，以及首个使这一切变得容易的现代创新：批归一化（Batch Normalization）。
+
 **核心原理**:
 
 ```
@@ -163,6 +175,9 @@ BatchNorm 公式:
 | **中文注释版** | [makemore-part4-comment](./makemore-part4-comment/) |
 | **核心内容** | 手动实现反向传播、Cross Entropy、LayerNorm |
 
+**课程介绍**:
+我们取前一个视频中的 2 层 MLP（带 BatchNorm），手动实现反向传播，不再使用 PyTorch autograd 的 `loss.backward()`。即手动反向传播穿过交叉熵损失、第二个线性层、tanh、批归一化、第一个线性层和嵌入表。在此过程中，你将对梯度如何在计算图中反向流动获得直观的理解，并在高效 Tensors 的层面而非像 micrograd 那样在单个标量上操作。这有助于建立对神经网络优化的能力和直觉，为你在现代神经网络的调试和创新打下基础。
+
 **核心原理**:
 
 ```
@@ -186,6 +201,9 @@ BatchNorm 公式:
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-part5-comment](./makemore-part5-comment/) |
 | **核心内容** | 卷积神经网络、膨胀卷积、层次化结构 |
+
+**课程介绍**:
+我们将前一个视频的 2 层 MLP 改造成树状结构，得到类似于 DeepMind 的 WaveNet (2016) 的卷积神经网络架构。WaveNet 论文中使用因果膨胀卷积（causal dilated convolutions）更高效地实现了相同的层次结构。同时我们更深入地理解 `torch.nn` 是什么、它内部如何工作，以及典型的深度学习开发过程是什么样的（大量阅读文档、跟踪多维张量形状、在 Jupyter notebook 和仓库代码之间切换……）。
 
 **核心原理**:
 
@@ -213,6 +231,9 @@ WaveNet 堆叠:
 | **代码仓库** | [karpathy/makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [gpt-build-comment](./gpt-build-comment/) |
 | **核心内容** | Transformer 架构、Self-Attention、GPT 实现 |
+
+**课程介绍**:
+我们从零开始构建生成式预训练 Transformer（GPT），遵循论文 "Attention is All You Need" 以及 OpenAI 的 GPT-2/3。我们讨论与 ChatGPT 的联系，后者已风靡全球。我们观看 GitHub Copilot（本身也是一个 GPT）如何帮助我们写一个 GPT（元编程！）。建议观众先观看之前的 makemore 视频，熟悉自回归语言建模框架和 PyTorch nn 的基础知识。
 
 **⭐ 这是课程的核心视频！**
 
@@ -271,6 +292,9 @@ Output
 | **中文注释版** | [minbpe-comment](./minbpe-comment/) |
 | **核心内容** | BPE 算法、Tokenization 问题、GPT Tokenizer |
 
+**课程介绍**:
+分词器（Tokenizer）是大型语言模型（LLM）中必要且普遍的组件，负责在字符串和 token（文本片段）之间进行翻译。分词器是 LLM 流程中完全独立的一个阶段：它们有自己的训练集、训练算法（字节对编码 BPE），训练后实现两个基本函数：`encode()`（从字符串到 token）和 `decode()`（从 token 到字符串）。本课程从零开始构建 OpenAI GPT 系列使用的分词器。在此过程中，我们将看到许多 LLM 的奇怪行为和问题实际上可以追溯到分词环节。
+
 **核心原理**:
 
 ```
@@ -298,6 +322,9 @@ BPE 算法:
 | **代码仓库** | [build-nanogpt](https://github.com/karpathy/build-nanogpt) / [ng-video-lecture](https://github.com/karpathy/ng-video-lecture) |
 | **中文注释版** | [nanogpt-build-comment](./nanogpt-build-comment/) |
 | **核心内容** | 从零训练 GPT-2、使用 FineWeb 数据集 |
+
+**课程介绍**:
+我们使用 nanoGPT 从零开始训练一个 GPT-2 (124M) 模型。课程涵盖完整的训练流程，包括：使用 FineWeb 数据集进行预训练、实现 AdamW 优化器和权重衰减、设置分布式训练（DDP）、以及使用 HellaSwag 进行评估。在此过程中，你将学习到如何从头构建一个生产级别的语言模型训练 pipeline。
 
 **核心原理**:
 
