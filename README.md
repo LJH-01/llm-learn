@@ -29,6 +29,7 @@
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://www.youtube.com/watch?v=VMj-3S1tku0) |
+| **代码演示** | [lectures/micrograd](./lectures/micrograd/) |
 | **代码仓库** | [micrograd](https://github.com/karpathy/micrograd) |
 | **中文注释版** | [micrograd-comment](./micrograd-comment/) |
 | **核心内容** | 反向传播算法、梯度下降、PyTorch 基础 |
@@ -67,6 +68,7 @@
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://www.youtube.com/watch?v=PaCmpygFfXo) |
+| **代码演示** | [lectures/makemore/makemore_part1_bigrams.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-part1-comment](./makemore-part1-comment/) |
 | **核心内容** | 字符级语言模型、Bigram 模型、PyTorch Tensor |
@@ -106,6 +108,7 @@ Bigram 模型 — 最简单的语言模型
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://youtu.be/TCH_1BHY58I) |
+| **代码演示** | [lectures/makemore/makemore_part2_mlp.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-part2-comment](./makemore-part2-comment/) |
 | **核心内容** | MLP 架构、过拟合/欠拟合、学习率调优 |
@@ -141,6 +144,7 @@ MLP (Bengio 2003) — 多层感知机语言模型
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://youtu.be/P6sfmUTpUmc) |
+| **代码演示** | [lectures/makemore/makemore_part3_bn.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-part3-comment](./makemore-part3-comment/) |
 | **核心内容** | 激活函数统计、BatchNorm 原理、梯度诊断 |
@@ -171,6 +175,7 @@ BatchNorm 公式:
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://youtu.be/q8SA3rM6ckI) |
+| **代码演示** | [lectures/makemore/makemore_part4_backprop.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-part4-comment](./makemore-part4-comment/) |
 | **核心内容** | 手动实现反向传播、Cross Entropy、LayerNorm |
@@ -198,6 +203,7 @@ BatchNorm 公式:
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://youtu.be/t3YJ5hKiMQ0) |
+| **代码演示** | [lectures/makemore/makemore_part5_cnn1.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
 | **中文注释版** | [makemore-part5-comment](./makemore-part5-comment/) |
 | **核心内容** | 卷积神经网络、膨胀卷积、层次化结构 |
@@ -228,7 +234,8 @@ WaveNet 堆叠:
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://www.youtube.com/watch?v=kCc8FmEb1nY) |
-| **代码仓库** | [karpathy/makemore](https://github.com/karpathy/makemore) |
+| **代码演示** | [lectures/nanogpt](./lectures/nanogpt/) |
+| **代码仓库** | [nanoGPT](https://github.com/karpathy/nanoGPT) |
 | **中文注释版** | [gpt-build-comment](./gpt-build-comment/) |
 | **核心内容** | Transformer 架构、Self-Attention、GPT 实现 |
 
@@ -319,8 +326,9 @@ BPE 算法:
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://youtu.be/l8pRSuU81PU) |
+| **代码演示** | [nanogpt-build-comment](./nanogpt-build-comment/) |
 | **代码仓库** | [build-nanogpt](https://github.com/karpathy/build-nanogpt) / [nanoGPT](https://github.com/karpathy/nanoGPT) / [ng-video-lecture](https://github.com/karpathy/ng-video-lecture) |
-| **中文注释版** | [nanogpt-build-comment](./nanogpt-build-comment/) / [nanoGPT-comment](./nanoGPT-comment/) |
+| **中文注释版** | [nanoGPT-comment](./nanoGPT-comment/) |
 | **核心内容** | 从零训练 GPT-2、使用 FineWeb 数据集 |
 
 **课程介绍**:
@@ -408,35 +416,51 @@ karpathy-gpt-roadmap/
 ├── README.md                          # 本文件
 ├── SETUP.md                           # Python 环境配置指南
 │
-├── 阶段一/                           # 神经网络基础
-│   ├── micrograd-comment/            # Lecture 1 中文注释
-│   │   ├── code/engine.py            # 核心代码 + 中文注释
-│   │   ├── code/nn.py               # 神经网络模块 + 中文注释
-│   │   ├── notes.md                  # 学习笔记
-│   │   └── index.html                # 交互式代码解析网页
-│   │
-│   └── makemore-part1-comment/       # Lecture 2 中文注释
-│       ├── code/makemore_part1.py    # 代码 + 中文注释
-│       ├── notes.md                  # 学习笔记
-│       └── index.html                # 交互式网页
+├── lectures/                          # 原始课程代码（notebooks）
+│   ├── micrograd/                    # Lecture 1-2: 反向传播 Jupyter notebooks
+│   │   ├── micrograd_lecture_first_half_roughly.ipynb
+│   │   └── micrograd_lecture_second_half_roughly.ipynb
+│   ├── makemore/                     # Lecture 2-6: makemore Jupyter notebooks
+│   │   ├── makemore_part1_bigrams.ipynb
+│   │   ├── makemore_part2_mlp.ipynb
+│   │   ├── makemore_part3_bn.ipynb
+│   │   ├── makemore_part4_backprop.ipynb
+│   │   └── makemore_part5_cnn1.ipynb
+│   └── nanogpt/                      # Lecture 9: GPT 代码演示
+│       ├── README.md
+│       ├── bigram.py
+│       ├── gpt.py
+│       ├── input.txt
+│       └── more.txt
 │
-├── 阶段二/                           # MLP 与训练技术
-│   ├── makemore-part2-comment/       # Lecture 3 中文注释
-│   ├── makemore-part3-comment/       # Lecture 4 中文注释
-│   ├── makemore-part4-comment/       # Lecture 5 中文注释
-│   └── makemore-part5-comment/       # Lecture 6 中文注释
+├── micrograd-comment/                # Lecture 1 中文注释
+│   ├── code/engine.py               # 核心代码 + 中文注释
+│   ├── code/nn.py                   # 神经网络模块 + 中文注释
+│   ├── notes.md                     # 学习笔记
+│   └── index.html                   # 交互式代码解析网页
 │
-├── 阶段三/                           # Transformer 核心 ⭐
-│   ├── gpt-build-comment/            # Lecture 7 中文注释
-│   │   └── notes.md                  # Transformer 详细原理
-│   └── minbpe-comment/              # Lecture 8 中文注释
+├── makemore-part1-comment/          # Lecture 2 中文注释
 │
-├── 阶段四/                           # 训练与微调
-│   ├── nanogpt-build-comment/         # Lecture 9 中文注释 (build-nanogpt)
-│   └── nanoGPT-comment/              # nanoGPT 完整注释版
-│       ├── model.py                  # GPT 模型定义 + 详细中文注释
-│       ├── train.py                  # 训练脚本 + 详细中文注释
-│       └── ...
+├── makemore-part2-comment/          # Lecture 3 中文注释
+├── makemore-part3-comment/          # Lecture 4 中文注释
+├── makemore-part4-comment/          # Lecture 5 中文注释
+├── makemore-part5-comment/          # Lecture 6 中文注释
+│
+├── gpt-build-comment/               # Lecture 7 中文注释（Transformer 核心）
+│   └── notes.md                     # Transformer 详细原理
+│
+├── minbpe-comment/                  # Lecture 8 中文注释（BPE Tokenizer）
+│
+├── nanogpt-build-comment/           # Lecture 9 代码演示（build-nanogpt）
+│
+├── nanoGPT-comment/                 # nanoGPT 完整中文注释版
+│   ├── model.py                     # GPT 模型定义 + 详细中文注释
+│   ├── train.py                     # 训练脚本 + 详细中文注释
+│   ├── sample.py                    # 采样脚本 + 详细中文注释
+│   ├── bench.py                     # 基准测试 + 详细中文注释
+│   ├── configurator.py              # 配置管理 + 详细中文注释
+│   ├── config/                      # 配置文件目录
+│   └── data/                        # 数据准备脚本目录
 │
 └── 阶段五/                           # 底层实现 (可选)
     ├── llm-c-comment/
@@ -477,8 +501,9 @@ karpathy-gpt-roadmap/
 | [nn-zero-to-hero](https://github.com/karpathy/nn-zero-to-hero) | 主课程仓库 |
 | [micrograd](https://github.com/karpathy/micrograd) | 反向传播实现 |
 | [makemore](https://github.com/karpathy/makemore) | 字符级语言模型 |
-| [nanoGPT](https://github.com/karpathy/nanoGPT) | GPT 训练库 |
-| [build-nanogpt](https://github.com/karpathy/build-nanogpt) | GPT 从零构建 |
+| [nanoGPT](https://github.com/karpathy/nanoGPT) | GPT 训练库（完整版）|
+| [build-nanogpt](https://github.com/karpathy/build-nanogpt) | GPT 从零构建（视频配套）|
+| [ng-video-lecture](https://github.com/karpathy/ng-video-lecture) | GPT 简化版演示 |
 | [minbpe](https://github.com/karpathy/minbpe) | BPE Tokenizer |
 | [llm.c](https://github.com/karpathy/llm.c) | C/CUDA 训练 |
 | [llama2.c](https://github.com/karpathy/llama2.c) | 单文件 Llama2 |
