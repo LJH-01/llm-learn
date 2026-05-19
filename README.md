@@ -449,7 +449,7 @@ karpathy-gpt-roadmap/
 │   ├── notes.md                       # 学习笔记汇总
 │   └── README.md                     # 课程概览
 │
-├── gpt-build-comment/               # Lecture 7 中文注释（Transformer 核心）
+├── nanogpt-build-comment/           # Lecture 7 中文注释（Transformer 核心）
 │   └── notes.md                     # Transformer 详细原理
 │
 ├── minbpe-comment/                  # Lecture 8 中文注释（BPE Tokenizer）
