@@ -23,6 +23,19 @@
 
 ---
 
+## 📁 文件结构
+
+```
+nanogpt-build-comment/code/
+├── train_gpt2.py         # 主要训练脚本
+├── fineweb.py           # FineWeb 数据集处理
+├── hellaswag.py         # Hellaswag 评估
+├── input.txt            # 示例输入
+└── play.ipynb           # Jupyter Notebook 交互版
+```
+
+---
+
 ## 🏗️ GPT-2 配置
 
 ### 模型参数
@@ -34,39 +47,18 @@
 | n_embd | 768 | 1024 | 1280 | 1600 |
 | 参数量 | 124M | 350M | 774M | 1558M |
 
----
+### 训练超参数
 
-## 📊 训练配置
-
-### 关键超参数
-
-```python
-config = GPTConfig(
-    vocab_size=50257,      # BPE 词汇表
-    block_size=1024,       # 最大上下文长度
-    n_layer=12,            # Transformer 层数
-    n_head=12,             # 注意力头数
-    n_embd=768,            # 嵌入维度
-)
-```
-
-### 优化器配置
-
-```python
-optimizer = torch.optim.AdamW(
-    model.parameters(),
-    lr=1e-3,               # 学习率
-    weight_decay=0.1,      # 权重衰减
-    betas=(0.9, 0.99),
-    eps=1e-8,
-)
-```
+| 参数 | 值 |
+|------|------|
+| batch_size | 8 |
+| learning_rate | 1e-3 |
+| weight_decay | 0.1 |
+| max_steps | 10000 |
 
 ---
 
 ## 🔄 训练循环
-
-### 关键步骤
 
 ```python
 for step in range(num_steps):
@@ -91,7 +83,7 @@ for step in range(num_steps):
 
 ## 📈 训练监控
 
-### 使用 TensorBoard
+### TensorBoard 使用
 
 ```python
 from torch.utils.tensorboard import SummaryWriter
@@ -111,12 +103,12 @@ writer.add_scalar("Grad/norm", grad_norm, step)
 
 ### 监控指标
 
-| 指标 | 说明 |
-|------|------|
-| loss | 训练损失 |
-| eval loss | 验证损失 |
-| grad norm | 梯度范数（应 < 1.0） |
-| lr | 学习率 |
+| 指标 | 说明 | 期望范围 |
+|------|------|---------|
+| loss | 训练损失 | 下降趋势 |
+| eval loss | 验证损失 | 下降趋势 |
+| grad norm | 梯度范数 | < 1.0 |
+| lr | 学习率 | 恒定或衰减 |
 
 ---
 
@@ -178,5 +170,7 @@ python train_gpt2.py --sample-only --checkpoint out/model.pt
 
 ---
 
-> 📚 视频: [复现 GPT-2](https://www.youtube.com/watch?v=l8pRSuU81PU)
-> 📦 代码: [karpathy/build-nanogpt](https://github.com/karpathy/build-nanogpt)
+## 📚 相关资源
+
+- [视频: 复现 GPT-2](https://www.youtube.com/watch?v=l8pRSuU81PU)
+- [代码: karpathy/build-nanogpt](https://github.com/karpathy/build-nanogpt)
