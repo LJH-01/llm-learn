@@ -70,7 +70,7 @@
 | **视频** | [🎬 YouTube](https://www.youtube.com/watch?v=PaCmpygFfXo) |
 | **代码演示** | [lectures/makemore/makemore_part1_bigrams.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
-| **中文注释版** | [makemore-part1-comment](./makemore-part1-comment/) |
+| **中文注释版** | [makemore-comment](./makemore-comment/) |
 | **核心内容** | 字符级语言模型、Bigram 模型、PyTorch Tensor |
 
 **课程介绍**:
@@ -110,7 +110,7 @@ Bigram 模型 — 最简单的语言模型
 | **视频** | [🎬 YouTube](https://youtu.be/TCH_1BHY58I) |
 | **代码演示** | [lectures/makemore/makemore_part2_mlp.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
-| **中文注释版** | [makemore-part2-comment](./makemore-part2-comment/) |
+| **中文注释版** | [makemore-comment](./makemore-comment/) |
 | **核心内容** | MLP 架构、过拟合/欠拟合、学习率调优 |
 
 **课程介绍**:
@@ -146,7 +146,7 @@ MLP (Bengio 2003) — 多层感知机语言模型
 | **视频** | [🎬 YouTube](https://youtu.be/P6sfmUTpUmc) |
 | **代码演示** | [lectures/makemore/makemore_part3_bn.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
-| **中文注释版** | [makemore-part3-comment](./makemore-part3-comment/) |
+| **中文注释版** | [makemore-comment](./makemore-comment/) |
 | **核心内容** | 激活函数统计、BatchNorm 原理、梯度诊断 |
 
 **课程介绍**:
@@ -177,7 +177,7 @@ BatchNorm 公式:
 | **视频** | [🎬 YouTube](https://youtu.be/q8SA3rM6ckI) |
 | **代码演示** | [lectures/makemore/makemore_part4_backprop.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
-| **中文注释版** | [makemore-part4-comment](./makemore-part4-comment/) |
+| **中文注释版** | [makemore-comment](./makemore-comment/) |
 | **核心内容** | 手动实现反向传播、Cross Entropy、LayerNorm |
 
 **课程介绍**:
@@ -205,7 +205,7 @@ BatchNorm 公式:
 | **视频** | [🎬 YouTube](https://youtu.be/t3YJ5hKiMQ0) |
 | **代码演示** | [lectures/makemore/makemore_part5_cnn1.ipynb](./lectures/makemore/) |
 | **代码仓库** | [makemore](https://github.com/karpathy/makemore) |
-| **中文注释版** | [makemore-part5-comment](./makemore-part5-comment/) |
+| **中文注释版** | [makemore-comment](./makemore-comment/) |
 | **核心内容** | 卷积神经网络、膨胀卷积、层次化结构 |
 
 **课程介绍**:
@@ -439,12 +439,15 @@ karpathy-gpt-roadmap/
 │   ├── notes.md                     # 学习笔记
 │   └── index.html                   # 交互式代码解析网页
 │
-├── makemore-part1-comment/          # Lecture 2 中文注释
-│
-├── makemore-part2-comment/          # Lecture 3 中文注释
-├── makemore-part3-comment/          # Lecture 4 中文注释
-├── makemore-part4-comment/          # Lecture 5 中文注释
-├── makemore-part5-comment/          # Lecture 6 中文注释
+├── makemore-comment/                  # Lecture 2-6 中文注释（汇总）
+│   ├── code/                          # 各部分代码
+│   │   ├── makemore_part1.py         # Bigram 语言模型
+│   │   ├── makemore_part2.py         # MLP 语言模型
+│   │   ├── makemore_part3.py         # BatchNorm 与激活函数
+│   │   ├── makemore_part4.py         # 手动反向传播
+│   │   └── makemore_part5.py         # CNN/WaveNet
+│   ├── notes.md                       # 学习笔记汇总
+│   └── README.md                     # 课程概览
 │
 ├── gpt-build-comment/               # Lecture 7 中文注释（Transformer 核心）
 │   └── notes.md                     # Transformer 详细原理
