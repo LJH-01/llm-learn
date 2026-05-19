@@ -268,7 +268,7 @@ Output
 |------|------|
 | **视频** | [🎬 YouTube](https://www.youtube.com/watch?v=zduSFxRajkE) |
 | **代码仓库** | [minbpe](https://github.com/karpathy/minbpe) |
-| **中文注释版** | [tokenizer-comment](./tokenizer-comment/) |
+| **中文注释版** | [minbpe-comment](./minbpe-comment/) |
 | **核心内容** | BPE 算法、Tokenization 问题、GPT Tokenizer |
 
 **核心原理**:
@@ -402,7 +402,7 @@ karpathy-gpt-roadmap/
 ├── 阶段三/                           # Transformer 核心 ⭐
 │   ├── gpt-build-comment/            # Lecture 7 中文注释
 │   │   └── notes.md                  # Transformer 详细原理
-│   └── tokenizer-comment/            # Lecture 8 中文注释
+│   └── minbpe-comment/              # Lecture 8 中文注释
 │
 ├── 阶段四/                           # 训练与微调
 │   └── nanogpt-build-comment/         # Lecture 9 中文注释
