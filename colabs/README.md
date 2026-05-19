@@ -12,6 +12,6 @@
 | 4 | BatchNorm | [🎬](https://www.youtube.com/watch?v=P6sfmUTpUmc) | [Colab](https://colab.research.google.com/github/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part3_bn.ipynb) |
 | 5 | 手写反向传播 | [🎬](https://www.youtube.com/watch?v=q8SA3rM6ckI) | [Colab](https://colab.research.google.com/drive/1WV2oi2fh9XXyldh02wupFQX0wh5ZC-z-?usp=sharing) |
 | 6 | WaveNet | [🎬](https://www.youtube.com/watch?v=t3YJ5hKiMQ0) | [Colab](https://colab.research.google.com/github/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part5_cnn1.ipynb) |
-| 7 | Let's build GPT | [🎬](https://www.youtube.com/watch?v=kCc8FmEb1nY) | [Colab](https://colab.research.google.com/github/karpathy/makemore/blob/master/makemore_gpt.ipynb) |
+| 7 | Let's build GPT | [🎬](https://www.youtube.com/watch?v=kCc8FmEb1nY) |  |
 | 8 | GPT Tokenizer | [🎬](https://www.youtube.com/watch?v=zduSFxRajkE) | [Colab](https://colab.research.google.com/drive/1y0KnCFZvGVf_odSfcNAws6kcDD7HsI0L?usp=sharing) |
-| 9 | 复现 GPT-2 | [🎬](https://www.youtube.com/watch?v=l8pRSuU81PU) | [Colab](https://colab.research.google.com/github/karpathy/build-nanogpt/blob/master/train_gpt2.ipynb) |
+| 9 | 复现 GPT-2 | [🎬](https://www.youtube.com/watch?v=l8pRSuU81PU) | |
