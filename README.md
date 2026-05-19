@@ -295,7 +295,7 @@ BPE 算法:
 | 项目 | 内容 |
 |------|------|
 | **视频** | [🎬 YouTube](https://youtu.be/l8pRSuU81PU) |
-| **代码仓库** | [build-nanogpt](https://github.com/karpathy/build-nanogpt) |
+| **代码仓库** | [build-nanogpt](https://github.com/karpathy/build-nanogpt) / [ng-video-lecture](https://github.com/karpathy/ng-video-lecture) |
 | **中文注释版** | [nanogpt-build-comment](./nanogpt-build-comment/) |
 | **核心内容** | 从零训练 GPT-2、使用 FineWeb 数据集 |
 
