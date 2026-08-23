@@ -42,7 +42,7 @@ MLP:
 """
 
 import random
-from micrograd.engine import Value
+from engine import Value
 
 
 class Module:

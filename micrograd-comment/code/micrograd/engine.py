@@ -364,12 +364,14 @@ def _test():
     # 测试基本运算
     a = Value(2.0)
     b = Value(3.0)
-    c = a * b + a ** 2
-    c.backward()
+    c = Value(4.0)
+    d = a * b + c
+    d.backward()
 
-    print(f"a = {a.data}, a.grad = {a.grad}")  # da = b + 2a = 3 + 4 = 7
-    print(f"b = {b.data}, b.grad = {b.grad}")  # db = a = 2
-    print(f"c = {c.data}, c.grad = {c.grad}")   # dc = 1
+    print(f"a = {a.data}, a.grad = {a.grad}")  # a = 2.0, a.grad = 3.0
+    print(f"b = {b.data}, b.grad = {b.grad}")  # b = 3.0, b.grad = 2.0
+    print(f"c = {c.data}, c.grad = {c.grad}")   # c = 4.0, c.grad = 1
+    print(f"c = {d.data}, c.grad = {d.grad}")   # c = 10.0, c.grad = 1
 
     # 测试 ReLU
     x = Value(-2.0)
